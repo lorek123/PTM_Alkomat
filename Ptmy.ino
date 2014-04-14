@@ -9,57 +9,80 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 void setup()
 {
 	pinMode(52, OUTPUT); // beeper
+	pinMode(A13, OUTPUT); // R
+	pinMode(A12, OUTPUT); // G 
+	pinMode(A11, OUTPUT); // B
 	lcd.begin(16, 2);
 	Serial.begin(9600);
 	irrecv.enableIRIn();
 	podstawowy=przygotowanie_do_pomiaru();
+
 }
-
-int pomiar()
+void wyswietl_tekst(char* a, char* b){
+	lcd.clear();
+	lcd.setCursor(0, 0);
+	lcd.print(a);
+	lcd.setCursor(0, 1);
+	lcd.print(b);
+}
+double pomiar()
 {
-		Serial.println("Rozpoczêto Pomiar\n");
-		int tab[10]={0}; 
-		for (int i = 0; i < 10; i++)
-		{
-			tab[i]= analogRead(A3);
-			if(tab[i]-podstawowy>100){
-				analogWrite(A8,255);
-				analogWrite(A10,0);
-			}
-			else{
-				analogWrite(A10,255);
-				analogWrite(A8,0);
-			}
-			Serial.print("X");
-			delay(500);
+	Serial.println("Rozpoczeto Pomiar");
+	wyswietl_tekst("Start pomiaru", "Prosze dmuchac");
+	int tab[10]={0}; 
+	for (int i = 0; i < 10; i++)
+	{
+		tab[i]= analogRead(A3);
+		if(tab[i]-podstawowy>100){
+			analogWrite(A11,255);
+			analogWrite(A13,0);
 		}
-		int pom=0;
-		for (int i = 0; i < 10; i++)
-		{
-			pom+=tab[i];
+		else{
+			analogWrite(A13,255);
+			analogWrite(A11,0);
 		}
-		pom/=10;
-		Serial.print("\nZakonczono Pomiar\n");
-		digitalWrite(52,1);
-		delay(500);
-		digitalWrite(52,1);
-		delay(500);
-		digitalWrite(52,1);
-		delay(500);
-		pom *= 0.21;
-		return pom;
-
+		delay(1000);
+	}
+	double pom=0;
+	for (int i = 0; i < 10; i++)
+	{
+		pom+=tab[i];
+	}
+	pom/=10;
+	Serial.print("Zakonczono Pomiar");
+	wyswietl_tekst("Zakocznono", "pomiar");
+	beep(500);
+	delay(100);
+	beep(500);
+	delay(100);
+	beep(500);
+	delay(100);
+	pom *= 0.21;
+	return pom;
 }
 
 int przygotowanie_do_pomiaru(){
-	Serial.print("Kalibracja Alkomatu prosze czekac\n");
+	lcd.print(" Breathanalyser");
+	lcd.setCursor(6, 1);
+	lcd.print("2014");
+	delay(2500);
+	analogWrite(A11, 255);
+	Serial.print("Kalibracja Alkomatu prosze czekac");
+	wyswietl_tekst("Kalibracja","prosze czekac");
+	delay(1000);
 	int tab[120]={0};
-	for (int i=0;i<120;i++)
+	for (int i=0;i<120;i++) 
 	{
 		tab[i]=analogRead(A3);
-		Serial.print("Pozosta³o czasu do kalibracji: ");
+		Serial.print("Pozostalo czasu do kalibracji: ");
 		Serial.print(120-i);
-		Serial.print(" sekund\n"); 
+		Serial.print(" sekund\n");
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("Pozostalo");
+		lcd.setCursor(0, 1);
+		lcd.print(120 - i);
+		lcd.print(" sekund");
 		delay(1000);
 	}
 	int wart_pocz=0;
@@ -68,35 +91,49 @@ int przygotowanie_do_pomiaru(){
 		wart_pocz+=tab[i];
 	}
 	wart_pocz/=120;
+	wyswietl_tekst("Zakonczono", "konfiguracje");
+	delay(1000);
 }
 void beep(unsigned char delayms){
-  analogWrite(50, 100);      // Almost any value can be used except 0 and 255
-                           // experiment to get the best tone
-  delay(delayms);          // wait for a delayms ms
-  analogWrite(50, 0);       // 0 turns it off
-  delay(delayms);          // wait for a delayms ms   
+	digitalWrite(52, 100);      // Almost any value can be used except 0 and 255
+	// experiment to get the best tone
+	delay(delayms);          // wait for a delayms ms
+	digitalWrite(52, 0);       // 0 turns it off
+	delay(delayms);          // wait for a delayms ms   
 }  
 void loop() {
-	
+
 	int wynik_pomiaru=0;
-	
-	while (!irrecv.decode(&results)) {
-		if (results.value == 123456)
+
+	while (1) {
+		if (results.value == 16732535) // w lewo
 		{
+			analogWrite(A11, 0);
 			wynik_pomiaru = pomiar();
+			if(wynik_pomiaru > 0.2)
+			{
+				analogWrite(A13, 255);
+				beep(2500);
+			}
+			else
+				analogWrite(A12, 255);
+
+			lcd.clear();
+			lcd.setCursor(0,0);
+			lcd.print("Dmuchles:");
+			lcd.setCursor(0,1);
+			lcd.print(wynik_pomiaru);
+			lcd.print(" promila");
 		}
-		else if(results.value == 1234567){
+		else if(results.value == 16742535){ //w prawo
 			wyslijdopc(wynik_pomiaru);
 		}
-		//Serial.println(results.value, HEX);
+		if (irrecv.decode(&results)) {
+			Serial.println(results.value);
+		}
 		delay(1000);
-		lcd.print(results.value);
 		irrecv.resume(); // Receive the next value
 	}
-
-	//Serial.println(analogRead(A3));
-	delay(1000);
-	//Serial.println("wypisz");
 }
 
 void wyslijdopc(int wynik_pomiaru ){
