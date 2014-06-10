@@ -11,7 +11,6 @@
 #ifndef _VSARDUINO_H_
 #define _VSARDUINO_H_
 #define __AVR_ATmega2560__
-#define _VMDEBUG 1
 #define ARDUINO 155
 #define ARDUINO_MAIN
 #define __AVR__
@@ -45,7 +44,7 @@ double pomiar();
 int przygotowanie_do_pomiaru();
 void beep(unsigned char delayms);
 //
-void wyslijdopc(int wynik_pomiaru );
+void wyslijdopc( double val);
 
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\avr\cores\arduino\arduino.h"
 #include "C:\Program Files (x86)\Arduino\hardware\arduino\avr\variants\mega\pins_arduino.h" 
