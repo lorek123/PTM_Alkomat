@@ -120,10 +120,7 @@ void loop() {
     lcd.setCursor(0, 0);
     lcd.print("Dmuchles:");
     lcd.setCursor(0, 1);
-    if (wynik_pomiaru < 0)	wynik_pomiaru = 0.00;
-    char output[4];
-	snprintf(output,4,"%d",wynik_pomiaru);
-	lcd.print(output);
+	lcd.print(wynik_pomiaru);
     lcd.print(" promila");
     delay(5000);
     wyslijdopc((double)wynik_pomiaru);
