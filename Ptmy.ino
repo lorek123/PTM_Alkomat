@@ -1,7 +1,6 @@
 #include <IRremote.h>
 #include <LiquidCrystal.h>
 
-
 int podstawowy = 0; // zmienna do kalibracji czujnika
 decode_results results;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
@@ -9,9 +8,9 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 void setup()
 {
   pinMode(52, OUTPUT); // beeper
-  pinMode(A13, OUTPUT); // R
-  pinMode(A12, OUTPUT); // G
-  pinMode(A11, OUTPUT); // B
+  pinMode(6, OUTPUT); // R
+  pinMode(8, OUTPUT); // G
+  pinMode(7, OUTPUT); // B
   lcd.begin(16, 2);
   Serial.begin(9600);
   IRrecv irrecv(9);
@@ -32,14 +31,13 @@ double pomiar()
   for (int i = 0; i < 10; i++)
   {
     tab[i] = analogRead(A3);
-    wyslijdopc((double)tab[i]);
     if (tab[i] - podstawowy > 100) {
-      analogWrite(A11, 255);
-      analogWrite(A13, 0);
+      analogWrite(6, 255);
+      analogWrite(7, 0);
     }
     else {
-      analogWrite(A13, 255);
-      analogWrite(A11, 0);
+      analogWrite(6, 255);
+      analogWrite(7, 0);
     }
     delay(1000);
   }
@@ -64,7 +62,7 @@ int przygotowanie_do_pomiaru() {
   lcd.setCursor(6, 1);
   lcd.print("2014");
   delay(2500);
-  analogWrite(A11, 255);
+  analogWrite(6, 100);
   wyswietl_tekst("Kalibracja", "prosze czekac");
   delay(1000);
   int tab[120] = {0};
@@ -107,23 +105,25 @@ void loop() {
   while (1) {
     //if (results.value == 16732535) // w lewo
     //{
-    analogWrite(A11, 0);
-	analogWrite(A12, 0);
-	analogWrite(A13, 0);
-    wynik_pomiaru = (double)(((pomiar() - podstawowy)/100) - 2);
+    analogWrite(6, 0);
+	analogWrite(8, 0);
+	analogWrite(7, 0);
+    wynik_pomiaru = (double)(pomiar());
     if (wynik_pomiaru > 0.2)
     {
-      analogWrite(A13, 255);
+      analogWrite(7, 255);
       beep(2500);
     }
     else
-      analogWrite(A12, 255);
+      analogWrite(8, 255);
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Dmuchles:");
     lcd.setCursor(0, 1);
-    if (wynik_pomiaru < 0)	wynik_pomiaru = 0;
-    lcd.print(wynik_pomiaru,4);
+    if (wynik_pomiaru < 0)	wynik_pomiaru = 0.00;
+    char output[4];
+	snprintf(output,4,"%d",wynik_pomiaru);
+	lcd.print(output);
     lcd.print(" promila");
     delay(5000);
     wyslijdopc((double)wynik_pomiaru);
