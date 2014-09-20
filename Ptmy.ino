@@ -108,8 +108,7 @@ void loop() {
     analogWrite(6, 0);
 	analogWrite(8, 0);
 	analogWrite(7, 0);
-    wynik_pomiaru = (double)(pomiar());
-	//0,0997ln(x) - 0,4432
+    wynik_pomiaru = (double) 0.06 * log(pomiar() - podstawowy) - 0.16;
     if (wynik_pomiaru > 0.2)
     {
       analogWrite(7, 255);
