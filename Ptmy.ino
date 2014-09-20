@@ -4,7 +4,7 @@
 int podstawowy = 0; // zmienna do kalibracji czujnika
 decode_results results;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
-IRrecv irrecv(9);
+//IRrecv irrecv(9); 
 void setup()
 {
 	pinMode(52, OUTPUT); // beeper
@@ -13,7 +13,7 @@ void setup()
 	pinMode(7, OUTPUT); // B
 	lcd.begin(16, 2);
 	Serial.begin(9600);
-	irrecv.enableIRIn();
+//	irrecv.enableIRIn();
 	podstawowy = przygotowanie_do_pomiaru();
 }
 void wyswietl_tekst(char* a, char* b) { //do wyœwietlania tekstu na LCD
@@ -101,9 +101,9 @@ void beep(unsigned char delayms) {
 void loop() {
 	double wynik_pomiaru = 0;
 	while (1) {
-		wyswietl_tekst("lewo- pomiar","prawo - USB");
-		if (results.value == 16732335) // w lewo
-		{
+//		wyswietl_tekst("lewo- pomiar","prawo - USB");
+//		if (results.value == 16732335) // w lewo
+//		{
 			analogWrite(6, 0); // zerowanie diody RGB
 			analogWrite(8, 0); //
 			analogWrite(7, 0); //
@@ -123,13 +123,12 @@ void loop() {
 			lcd.print(" promila");
 			delay(5000);
 			wyslijdopc((double)wynik_pomiaru);
-		}
-		else if(results.value == 16742535 ){ //w prawo
+//		}
+//		else if(results.value == 16742535 ){ //w prawo
 			wyslijdopc(wynik_pomiaru);
 		}
-		delay(1000);
-		irrecv.resume(); // Receive the next value
-	}
+		//irrecv.resume(); // Receive the next value
+//	}
 }
 
 void wyslijdopc( double val){
